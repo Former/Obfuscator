@@ -164,12 +164,14 @@ def Obfuscator(in_file):
         f.write(l.encode('utf-8'))
     f.close()
 
-    f = open(in_file+".ob.py", 'wb') #, encoding='utf-8')
+    in_file_ext = in_file[in_file.rfind('.') + 1:]
+
+    f = open(in_file+".ob." + in_file_ext, 'wb')
     g = Guard()
     for l in lines:
         if g.Update(l):
             for i in range(len(key_word_matches)):
-                l = re.sub(r"\b%s\b" % key_word_matches[i], rand_matches[i], l) #l.replace(key_word_matches[i], rand_matches[i])  # r"(:?\A|\s*|;)"+key_word_matches[i]+"(:?\Z|\s*|;|\(|\))"
+                l = re.sub(r"\b%s\b" % key_word_matches[i], rand_matches[i], l)
 
         f.write(l.encode('utf-8'))
     f.close()
