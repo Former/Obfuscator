@@ -4,22 +4,28 @@ def quicksort(nums):
    if len(nums) <= 1:
        return nums
    else:
-       q = random.choice(nums)
+       cur_num = random.choice(nums)
+       # Защита от изменений
+       #start_guard
        s_nums = []
        m_nums = []
+       #stop_guard
        e_nums = []
-       for n in nums:
-           if n < q:
-               s_nums.append(n)
-           elif n > q:
-               m_nums.append(n)
+       for num in nums:
+           if num < cur_num:
+               s_nums.append(num)
+           elif num > cur_num:
+               m_nums.append(num)
            else:
-               e_nums.append(n)
+               e_nums.append(num)
        return quicksort(s_nums) + e_nums + quicksort(m_nums)
 
 def Test():
-    def isEqualArray(a, b):
-        return str(a) == str(b)
+    # Частичная защита от изменений, можно задавать regexp, который включит всё найденное в список исключений (см. a_Array1, a_Array2)
+    #start_guard (a_\w+)
+    def isEqualArray(a_Array1, a_Array2):
+    #stop_guard
+        return str(a_Array1) == str(a_Array2)
     qs1 = quicksort([5,4,3,2,1])
     qs2 = quicksort([1,2,3,2,1])
     assert isEqualArray(qs1, [1,2,3,4,5]), qs1
