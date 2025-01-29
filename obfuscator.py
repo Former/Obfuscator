@@ -9,7 +9,7 @@ from enum import auto
 pyton_guard = dir(__builtins__)
 pyton_guard += ["__init__", "items", "self"]
 
-html_guard_s = "checked n t h1 h2 h3 h4 h5 h6 h7 h8 br html head body title bgcolor text link vlink alink pre h1 h6 b i tt cite em font size color a href img src name align p blockquote dl dt dd li div border hr table tr td th cellspacing width valign colspan rowspan frameset rows  cols frame noframes  marginwidth marginheight scrolling noresize select multiple option textarea input checkbox radio value submit reset image"
+html_guard_s = "checked n t h1 h2 h3 h4 h5 h6 h7 h8 br html head body title bgcolor text link vlink alink pre h1 h6 b i tt cite em font size color a href img src name align p blockquote dl dt dd li div border hr table tr td th cellspacing width valign colspan rowspan frameset rows  cols frame noframes  marginwidth marginheight scrolling noresize select multiple option textarea input checkbox radio value submit reset image canvas"
 html_guard = html_guard_s.split()
 
 start_guard = "#start_guard"
