@@ -34,10 +34,11 @@ import re
 
 # Слова под замену для языка python
 
-func_prefix = r'(?:\A|;)\s*def\s*\w+\s*\('
+func_prefix_python = r'(?:\A|;)\s*def\s*\w+\s*\('
 skip_param = r'\s*\w+\s*[,]'
 match_param = r'\s*(\w+)\s*(?:,|\))'
 
+func_prefix = func_prefix_python
 python_templates = {
     VarType.LOCAL_VAR:      r'(?:\A|;)\s*(\w+)\s*\=',
     VarType.MEMBER_VAR:     r'(?:\A|;)\s*self\.(\w+)\s*\=',
@@ -62,6 +63,36 @@ def PythonFindAll(text):
 def PythonFind(var_type, text):
     return re.findall(python_templates.get(var_type), text)
 
+# Слова под замену для языка js
+
+func_prefix_js = r'(?:\A|;)\s*function\s*\w+\s*\('
+func_prefix = func_prefix_js
+
+java_script_templates = {
+    VarType.LOCAL_VAR:      r'(?:\A|;)\s*(?:var|const|let)\s*(\w+)\s*(?:;|\=)',
+    VarType.MEMBER_VAR:     r'(?:\A|;)\s*this\.(\w+)\s*\=',
+    VarType.CLASS_NAME:     r'(?:\A|;)\s*class\s*(\w+)\s*',
+    VarType.FUNCTION_NAME:  r'(?:\A|;)\s*function\s*(\w+)\s*\(',
+    VarType.FOR_VAR:        r'(?:\A|;)\s*for\s*\(\s*(?:let|var|const)\s+(\w+)\s*of',
+    VarType.FUNCTION_PARAM1: func_prefix + match_param,
+    VarType.FUNCTION_PARAM2: func_prefix + skip_param*1 + match_param,
+    VarType.FUNCTION_PARAM3: func_prefix + skip_param*2 + match_param,
+    VarType.FUNCTION_PARAM4: func_prefix + skip_param*3 + match_param,
+    VarType.FUNCTION_PARAM5: func_prefix + skip_param*4 + match_param,
+    VarType.FUNCTION_PARAM6: func_prefix + skip_param*5 + match_param,
+    VarType.FUNCTION_PARAM7: func_prefix + skip_param*6 + match_param,
+}
+
+def JavaScriptFindAll(text):
+    result = [];
+    for t in VarType:
+        result += JavaScriptFind(t, text)
+    return result
+
+def JavaScriptFind(var_type, text):
+    return re.findall(java_script_templates.get(var_type), text)
+
+
 def Test():
     def isEqualArray(a, b):
         return str(a) == str(b)
@@ -85,11 +116,39 @@ def Test():
     matches_all = PythonFindAll(text + text1 + text2 + text5)
 
     assert isEqualArray(matches_var, ['x', 'yD1', 'a3']), matches_var
-    assert isEqualArray(matches_class_var, ['d31'])
-    assert isEqualArray(matches_func, ['Test1'])
-    assert isEqualArray(matches_class1, ['Test2'])
-    assert isEqualArray(matches_class2, ['Test3'])
-    assert isEqualArray(matches_for, ['id3'])
+    assert isEqualArray(matches_class_var, ['d31']), matches_class_var
+    assert isEqualArray(matches_func, ['Test1']), matches_func
+    assert isEqualArray(matches_class1, ['Test2']), matches_class1
+    assert isEqualArray(matches_class2, ['Test3']), matches_class2
+    assert isEqualArray(matches_for, ['id3']), matches_for
+    assert isEqualArray(matches_param1, ['sdfd']), matches_param1
+    assert isEqualArray(matches_param2, ['wer1']), matches_param2
+    assert isEqualArray(matches_all, ['x', 'yD1', 'a3', 'd31', 'Test2', 'Test1', 'Test5', 'sdfd', 'p1', 'wer1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7']), matches_all
+
+    text = "\tlet x   = 234 ; var yD1 = 123;const a3=1;\tthis.d31 = 23;"
+    text1 = "\t   function   Test1(sdfd,wer1) { return; }"
+    text2 = ";\t   class   Test2 {}"
+    text3 = "\t   class   Test3 {}"
+    text4 = "\t   for  ( let id3 of dfd ) {}"
+    text5 = ";\t function   Test5(  p1, p2 , p3,p4,p5,p6,p7,p8): return;"
+
+    matches_var = JavaScriptFind(VarType.LOCAL_VAR, text)
+    matches_class_var = JavaScriptFind(VarType.MEMBER_VAR, text)
+    matches_func = JavaScriptFind(VarType.FUNCTION_NAME, text1)
+    matches_class1 = JavaScriptFind(VarType.CLASS_NAME, text2)
+    matches_class2 = JavaScriptFind(VarType.CLASS_NAME, text3)
+    matches_for = JavaScriptFind(VarType.FOR_VAR, text4)
+    matches_param1 = JavaScriptFind(VarType.FUNCTION_PARAM1, text1)
+    matches_param2 = JavaScriptFind(VarType.FUNCTION_PARAM2, text1)
+
+    matches_all = JavaScriptFindAll(text + text1 + text2 + text5)
+
+    assert isEqualArray(matches_var, ['x', 'yD1', 'a3']), matches_var
+    assert isEqualArray(matches_class_var, ['d31']), matches_class_var
+    assert isEqualArray(matches_func, ['Test1']), matches_func
+    assert isEqualArray(matches_class1, ['Test2']), matches_class1
+    assert isEqualArray(matches_class2, ['Test3']), matches_class2
+    assert isEqualArray(matches_for, ['id3']), matches_for
     assert isEqualArray(matches_param1, ['sdfd']), matches_param1
     assert isEqualArray(matches_param2, ['wer1']), matches_param2
     assert isEqualArray(matches_all, ['x', 'yD1', 'a3', 'd31', 'Test2', 'Test1', 'Test5', 'sdfd', 'p1', 'wer1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7']), matches_all
@@ -142,6 +201,7 @@ def Obfuscator(in_file):
     for l in lines:
         if g.Update(l):
             key_word_matches += PythonFindAll(l)
+            key_word_matches += JavaScriptFindAll(l)
         guard_regexp_list = g.GetGuardRegExpList()
         for gr in guard_regexp_list:
             key_word_guard += re.findall(gr, l)
